@@ -1,0 +1,48 @@
+--DROP TABLE department CASCADE;
+--DROP TABLE student CASCADE;
+--DROP TABLE course CASCADE;
+--DROP TABLE sc CASCADE;
+
+--department(dNo,dName,officeRoom,homepage)
+--student(sNo,sName,sex,age,dNo)
+--course(cNo,cName,cPNo,credit,dNo)
+--sc(sNo,cNo,score,recordDate)
+
+CREATE TABLE department(
+  dNo           CHAR(2)        NOT NULL UNIQUE,
+  dName         VARCHAR(20),
+  officeRoom    VARCHAR(40),
+  homePage      VARCHAR(80),
+  PRIMARY KEY(dNo)
+);
+
+CREATE TABLE student(
+  sNo 		CHAR(6)        NOT NULL UNIQUE,
+  sName		VARCHAR(20)    NOT NULL,
+  sex		CHAR(2)        CHECK (sex IN('ÄÐ','Å®')),      
+  age		INT,
+  dNo		CHAR(2),
+  PRIMARY KEY(sNo),
+  FOREIGN KEY (dNo) REFERENCES  department(dNo)
+);
+
+CREATE TABLE course(
+  cNo		CHAR(6)	       NOT NULL UNIQUE,
+  cName		VARCHAR(20)    NOT NULL,
+  cPNo		CHAR(6),
+  credit	INT,
+  dNo           CHAR(2),
+  PRIMARY KEY(cNo),
+  FOREIGN KEY (cPNo) REFERENCES  course(cNo),
+  FOREIGN KEY (dNo)  REFERENCES  department(dNo)
+);
+
+CREATE TABLE sc(
+  sNo		CHAR(6)	       NOT NULL,
+  cNo		CHAR(6)	       NOT NULL,
+  score		INT,
+  recordDate    date,
+  PRIMARY KEY(sNo,cNo),
+  FOREIGN KEY (sNo) REFERENCES  student(sNo),
+  FOREIGN KEY (cNo) REFERENCES  course(cNo)
+);

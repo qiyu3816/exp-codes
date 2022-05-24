@@ -1,0 +1,76 @@
+1.
+    (1)
+    见(5)
+    (2)
+    select relname, reltuples, relpages from pg_class where relname='lot';
+    "relname","reltuples","relpages"
+    'lot',249999,2688
+    bFactor(lot) = [249999/2688] = 94
+    
+    select relname, reltuples, relpages from pg_class where relname='customer';
+    "relname","reltuples","relpages"
+    'customer',249999,1441
+    bFactor(customer) = [249999/1441] = 174
+    
+    select relname, reltuples, relpages from pg_class where relname='customer_lot';
+    "relname","reltuples","relpages"
+    'customer_lot',249999,1107
+    bFactor(customer_lot) = [249999/1107] = 226
+    (3)
+    查询1
+    create index index_lot_id on lot using btree(lot_id);
+    explain analyze select lot_id from lot where lot_size between 300 and 15000;
+    
+    查询2
+    create index index_lot_value on lot using btree(lot_value);
+    explain analyze select lot_id from lot where lot_value between 3000 and 15000;
+    
+    查询3
+    create index index_customer_id on customer using hash(customer_id);
+    explain analyze select * from customer where customer_id=12;
+    
+    查询4
+    create index index_customer_id on customer using hash(customer_id);
+    explain analyze insert into customer values (250001, 'Vince', 'Smith' ); 
+    
+    查询5
+    create index index_customer_id on customer using hash(customer_id);
+    explain analyze delete from customer where customer_id='250001'; 
+
+    查询6
+    create index index_customer_id on customer using hash(customer_id);
+    explain analyze update customer set customer_first_name='Vinny' where customer_id='249001'; 
+    
+    查询7
+    create index index_lot_id on lot using hash(lot_id);
+    explain analyze select avg(lot_size) from lot; 
+    (4)
+    1查询在一个范围内，用btree，范围用lot_id判定，索引用lot_id。
+    2查询在一个范围内，用btree，范围用lot_value判定，索引用customer_id。
+    3查询一个准确的数，用hash，根据customer_id判定，索引用customer_id。
+    4查询一个准确的数，用hash，查询主体customer，索引用custome_id，重新建立hash索引。
+    5删除一个元组，查询准确的数，根据customer_id判定，引用customer_id，建立hash索引。
+    6更改一个元组，查询准确的数，根据customer_id判定，引用customer_id，建立hash索引。
+    7计算平均值，所有元组都将遍历，实际上无需建立索引。
+    (5)
+           | Without Index                | With Index                   | Performance Improvement
+    -----------------------------------------------------------------------------
+    Query  | Estimate | Actual   | Actual | Estimate | Actual   | Actual |
+    Number | Disk     | Disk     | Run    | Disk     | Disk     | Run    |
+           | Accesses | Accesses | Time   | Accesses | Accesses | Time   |
+    -----------------------------------------------------------------------------
+    1      | 6437.98  | 51.463   | 54.685 | 6437.98  | 47.478   | 50.344 | 7.92%
+    2      | 6199.37  | 60.013   | 60.094 |          | 4.634    | 4.799  | 92.02%
+    3      | 4279.33  | 61.181   | 61.202 | 8.02     | 0.024    | 0.038  | 99.92%
+    4      | 0.01     | 0.162    | 0.208  | 0.01     | 0.051    | 0.075  | 63.93%
+    5      | 4566.02  | 18.575   | 22.059 | 8.02     | 0.029    | 0.101  | 99.44%
+    6      | 4565.99  | 23.535   | 23.571 | 8.02     | 0.051    | 0.086  | 99.60%
+    7      | 5526.35  | 68.331   | 68.400 | 5526.35  | 71.271   | 71.344 | -4.30%
+    (6)
+    索引使select和where语句加速了，使insert和update语句减速了。如果1，2，3类查询常见接近75%，4类查询不常见接近25%，则一些查询性能的提高超过了其他查询所降低的。如果1，2，3类查询和4类查询比例都接近50%，建索引对查询效率没有明显影响，可以不建索引。
+
+2. 等到一年后再做。因为第一年主要是插入数据，过早创建索引不仅不会提高插入的效率，反而需要频繁修改索引，然而第一年后创建索引，则可以较大的提升查询效率。
+
+3. 因为用于性别查询的条件选择性不强，且索引是字符类型，查询结果便是数据库的大部分数据，最后数据库认为索引效率不高而选择放弃。使用聚类索引会有帮助，因为数据库中的索引是按聚合排列的。
+
+4. 因为数据库很难自己认识到，为了一些使用频率低的数据而进行频繁修改和更新是不值得的，很影响查询效率，所以将查询结果固定到一张新表中，然后定时更新这个表，从这个表中获取结果。

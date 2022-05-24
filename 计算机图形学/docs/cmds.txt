@@ -1,0 +1,2 @@
+g++ ..\src\OpenGLTest.cpp -lglut32 -lglu32 -lopengl32 -o OpenGLTest 编译命令
+g++ ..\src\GDIDrawPoint.cpp -lgdi32 -o point GDI程序编译命令

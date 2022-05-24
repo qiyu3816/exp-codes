@@ -1,0 +1,74 @@
+4. 第一个窗口
+begin transaction;
+update account
+set balance = 455.66
+where id = 2;
+select * from account;
+
+"id","balance"
+1,105.59
+2,455.66
+
+6. 第二个窗口
+select * from account;
+
+"id","balance"
+1,105.59
+2,1050.59
+
+7. 第一个窗口提交事务
+commit;
+
+8. 第二个窗口查询表account的所有行
+select * from account;
+
+"id","balance"
+1,105.59
+2,455.66
+是，因为窗口一所做的改变已经提交
+
+9. 第二个窗口提交事务
+
+10. 两个窗口都开始一个新事务
+
+11. 第二个窗口设置事务隔离等级为SERIALIZABLE
+set transaction isolation level SERIALIZABLE;
+
+12. 第一个窗口设置活期储蓄账户余额1400
+update account
+set balance = 1400
+where id = 2;
+
+13. 第二个窗口设置定期储蓄账户余额为1
+update account
+set balance = 1
+where id = 1;
+
+14.
+窗口一查询结果
+"id","balance"
+1,105.59
+2,1400
+
+窗口二查询结果
+"id","balance"
+1,1
+2,455.66
+
+15. 第一个窗口提交事务
+
+16. 活期储蓄账户值未更新，因为SERIALIZABLE不允许“不可重读”。
+    第一个窗口定期储蓄账户值未更新，因为第二个窗口做出改变的事务没有提交。
+
+17.
+窗口一查询结果
+"id","balance"
+1,1
+2,1400
+
+窗口二查询结果
+"id","balance"
+1,1
+2,1400
+
+两个窗口得到的查询结果一致，因为二者都将自己所做的改变提交到了数据库，提交后没有做出新的改变，所做的查询结果都将是一致的。

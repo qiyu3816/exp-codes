@@ -1,0 +1,20 @@
+1. primary key: TrackinNum
+2. EmpID      -> EmpName
+   OrderNo    -> ShipToAddr
+   TrackinNum -> EmpID
+   TrackinNum -> EmpName     传递依赖
+   TrackinNum -> OrderNo
+   TrackinNum -> ShipToAddr  传递依赖
+   TrackinNum -> ShippedDate
+3. 插入异常，比如要插入新的Shipment元组，那么如果新的元组ShipToAddr与OrderNo
+对应的订单里的地址不一致就会成为插入异常；
+   更新异常，例如在更新Shipment的一个元组时，如果只更新了EmpID而没有更新
+EmpName，那么将出现与员工关系中相应元组不一致的异常。
+   删除异常，例如一个员工只寄了一单，这一单被删除的话，该员工的信息也会被删除。
+4. 第二范式，因为其每一行和每一列的相交位置有且仅有一个值，而且所有非主关键
+字属性都完全依赖于主关键字。
+5. 要将第二范式关系规范化为第三范式需要消除传递依赖，可以新建关系将这些属性
+及其决定方移入新关系中。本题关系中有如下传递依赖：
+   TrackinNum -> EmpName     传递依赖
+   TrackinNum -> ShipToAddr  传递依赖
+   创建新关系Employee(EmpID, EmpName)，主关键字EmpID；创建新关系Order(OrderNo, ShipToAddr)，主关键字OrderNo。并将EmpName和ShipToAddr从ShipMent中删除。

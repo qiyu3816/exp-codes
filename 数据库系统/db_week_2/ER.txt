@@ -1,0 +1,106 @@
+实体————书，与文档描述的差别只是加了一个促销价格
+BookTitle
+bAuthor         VARCHAR(20)  NOT NULL,
+bTitle          VARCHAR(20)  NOT NULL,
+bISBN           VARCHAR(13)  NOT NULL UNIQUE,
+bPublisher      VARCHAR(20)  NOT NULL,
+bEdition        int          NOT NULL,
+bPubDate        date         NOT NULL,
+bPrice          FLOAT(2)     NOT NULL,
+bPricePromotion FLOAT(2)     NOT NULL,
+bDescription    VARCHAR(100) OPTIONAL,
+bCategories     VARCAHR(15)  NOT NULL,
+PRIMARY bISBN
+
+实体————出版者，地址由pAddressNo在Address中唯一指明
+Publisher
+pNo             int         NOT NULL UNIQUE,
+pName           VARCAHR(20) NOT NULL,
+pAddressNo      int         NOT NULL,
+PRIMARY pNo
+
+复合属性，地址，单独创建一个表来存储，包括国家、州、市、街道
+Address
+aNo         int         NOT NULL UNIQUE,
+aCountry    VARCHAR(20) NOT NULL,
+aState      VARCHAR(20) NOT NULL,
+aCity       VARCHAR(20) NOT NULL,
+aStreet     VARCHAR(20) NOT NULL,
+PRIMARY aNo
+
+实体————顾客，复合属性姓名由cNo在PersonName中唯一指明，邮寄地址由cAddressNum在Address中唯一指明，信用卡由cCardNum在CreditCard中唯一指明
+Customer
+cNo                 int         NOT NULL UNIQUE,
+cAddressNo          int         NOT NULL,
+cCardNum            int         NOT NULL,
+cPhoneNum           int         NOT NULL,
+cEmailAddress       VARCHAR(20) NOT NULL,
+PRIMARY cNo
+
+复合属性，人名，包含客户序号来指明其所属的客户
+PersonName
+cNo             int         NOT NULL UNIQUE,
+firstName       VARCHAR(10) NOT NULL,
+middleInitial   VARCHAR(10) NOT NULL,
+lastName        VARCHAR(10) NOT NULL,
+PRIMARY cNo
+
+复合属性，信用卡，卡号即可唯一标识
+CreditCard
+cardNum     int  NOT NULL UNIQUE,
+cardExpDate date NOT NULL,
+PRIMARY cardNum
+
+弱实体————订单（依赖于Customer），邮寄地址由oAddressNum在Address中唯一指明，信用卡由oCardNum在CreditCard中唯一指
+明；一个订单可能有多种书，一种书可能买多本，故一种书的订购数量、折后价格、税务等信息统一成一个弱实体CartItem，其
+由oPNo唯一标识，且包含一个订单号oNum属性指明其所属的订单
+Order
+oNum           int                  NOT NULL UNIQUE,
+cNo            int                  NOT NULL,
+oAddressNo     int                  NOT NULL,
+oCardNo        int                  NOT NULL,
+oShipMethod    VARCHAR(20)          NOT NULL,
+oShipDate      date                 NOT NULL,
+oCreatedDate   date                 NOT NULL,
+PRIMARY oNum
+
+复合属性，订单中的一个单项
+CartItem
+oNum                int         NOT NULL UNIQUE,
+oPNo                int         NOT NULL,
+bISBN               VARCHAR(13) NOT NULL,
+bPrice              FLOAT(2)    NOT NULL,
+bPricePromotion     FLOAT(2)    NOT NULL,
+oPNum               int         NOT NULL,
+oPShipCost          FLOAT(2)    NOT NULL,
+oPTax               FLOAT(2)    NOT NULL,
+PRIMARY oPNo
+
+弱实体————履行订单（依赖于Order），客户下的订单可能被分成几次来履行并发货，但发货的物流单号foTrackNum是唯一的，故
+用物流单号来标识
+FullfilledOrder
+oNum              int                         NOT NULL,
+foShipDate        date                        NOT NULL,
+foTrackNum        int                         NOT NULL UNIQUE,
+foDeliveryExpDate date                        NOT NULL,
+PRIMARY foTrackNum
+
+复合属性，履行订单的一个单项，一次发货可能有多种书，一种书可能发多本，故物流单号和Book的ISBN可以唯一标识
+FullfilledSnippet
+foTrackNum  int NOT NULL UNIQUE,
+bISBN       int NOT NULL,
+foTQuantity int NOT NULL,
+PRIMARY foTrackNum, bISBN
+
+弱实体————促销（依赖于Book），一本书同一时间只有它唯一的促销方式，故用Book的ISBN标识
+Promotion
+proBookISBN int       NOT NULL,
+proPercent  FLOAT(2)  NOT NULL,
+PRIMARY proBookISBN
+
+复合属性，时长，对应一本书此时的促销起始时间段
+Duration
+proBookISBN int   NOT NULL,
+startDate   date  NOT NULL,
+endDate     date  NOT NULL,
+PRIMARY proBookISBN

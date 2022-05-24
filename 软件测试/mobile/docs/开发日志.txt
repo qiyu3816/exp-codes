@@ -1,0 +1,15 @@
+C:\Users\qiyu\AppData\Local\Android\Sdk\platform-tools\adb.exe devices
+C:\Users\qiyu\AppData\Local\Android\Sdk\platform-tools\adb.exe install D:\com.miui.calculator.apk
+C:\Users\qiyu\AppData\Local\Android\Sdk\build-tools\31.0.0\aapt.exe dump badging D:/com.miui.calculator.apk
+
+{
+  "platformName": "Android",
+  "platformVersion": "10",
+  "deviceName": "MQS7N19527013421",
+  "app": "D:/chlpack-207867-anjuke_15.23.1_322112_b688.apk",
+  "appPackage": "com.anjuke.android.app",
+  "appActivity": "com.anjuke.android.app.mainmodule.WelcomeActivity",
+  "noReset": true,
+  "unicodeKeyboard": true,
+  "resetKeyboard": true
+}

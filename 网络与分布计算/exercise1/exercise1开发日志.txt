@@ -1,0 +1,6 @@
+开发日志：
+	不要在判断条件里用BufferedReader读一次以上
+	UDP发较大文件记得设置缓冲区以及控制发包频率
+	进到对应的package：javac -d . *.java -encoding utf-8
+	在相应的package下运行：java exercise1.FileServer
+	javadoc -d ..\..\doc\package\classname -encoding utf-8  -charset UTF-8 .\classname.java

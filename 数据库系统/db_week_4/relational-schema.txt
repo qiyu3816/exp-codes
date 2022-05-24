@@ -1,0 +1,153 @@
+1.每个强实体创建一个表
+Category(category_id, category_name);
+PK: category_id
+category_id(单值, 简单)
+category_name(单值, 简单)
+
+Book(bISBN, author_id, bTitle, publisher_id, bVersion, bPubDate, bPrice, bDescription);
+PK: bISBN
+FK: author_id, publisher_id
+author_id -> Author(author_id)
+address_id -> Address(address_id)
+bISBN(单值, 简单)
+author_id(单值, 复合)
+bTitle(单值, 简单)
+publisher_id(单值, 复合)
+bVersion(单值, 简单)
+bPubDate(单值, 简单)
+bPrice(单值, 简单)
+bDescription(单值, 简单)
+
+SingleOrder(order_id, customer_id, address_id, card_number, create_date, total_price);
+PK: order_id
+FK: customer_id, address_id, card_numberBegin new transactions in both windows
+SingleOrder(customer_id) -> Customer(customer_id);
+SingleOrder(address_id) -> Address(address_id);
+SingleOrder(card_number) -> CreditCard(card_number);
+order_id(单值, 简单)
+customer_id(单值, 复合)
+address_id(单值, 复合)
+card_number(单值, 复合)
+create_date(单值, 简单)
+total_price(单值, 简单)
+
+3. 1:N弱实体建表
+LineItem(order_id, bISBN, quantity, total_price);
+弱实体(依赖于Order)
+PK: order_id, bISBN
+FK: order_id, bISBN
+order_id -> SingleOrder(order_id);
+bISBN -> Book(bISBN);
+order_id(单值, 复合)
+bISBN(单值, 复合)
+quantity(单值, 简单)
+total_price(单值, 简单)
+
+Author(author_id, first_name, middle_name, last_name, address_id, email_address);
+PK: author_id
+FK: address_id
+address_id -> Address(address_id)
+author_id(单值, 简单)
+first_name(单值, 简单)
+middle_name(单值, 简单)
+last_name(单值, 简单)
+address_id(单值, 简单)
+email_address(单值, 简单)
+
+4. 二元1:1关联关系
+Publisher(address_id) references Address(address_id);
+
+Book(author_id) references Author(author_id);
+Book(publisher_id) references Publisher(publisher_id);
+
+Customer(card_number) references CreditCard(card_number);
+Customer(address_id) references Address(address_id);
+
+SingleOrder(customer_id) references Customer(customer_id);
+SingleOrder(address_id) references Address(address_id);
+SingleOrder(card_number) -> CreditCard(card_number);
+
+5. 处理多对多循环关系，创建一个实体
+Publisher(publisher_id, publisher_name, address_id);
+PK: publisher_id
+FK: address_id
+address_id -> Address(address_id)
+publisher_id(单值, 简单)
+publisher_name(单值, 简单)
+address_id(单值, 复合)
+
+Shipment(tracking_num, ship_date, delivery_exp_date);
+PK: tracking_num
+tracking_num(单值, 简单)
+ship_date(单值, 简单)
+delivery_exp_date(单值, 简单)
+
+Customer(customer_id, card_number, first_name, middle_name, last_name, address_id, email_address);
+PK: customer_id
+FK: card_number, address_id
+card_number -> CreditCard(card_number);
+address_id -> Address(address_id);
+customer_id(单值, 简单)
+card_number(单值, 复合)
+first_name(单值, 简单)
+middle_name(单值, 简单)
+last_name(单值, 简单)
+address_id(单值, 复合)
+email_address(单值, 简单)
+
+Promotion(promotion_id, promotion_percent, promotion_start, promotion_end);
+PK: promotion_id
+promotion_id(单值, 简单)
+promotion_percent(单值, 简单)
+promotion_start(单值, 简单)
+promotion_end(单值, 简单)
+
+6.多对多属性 
+Book_Category(bISBN, category_id);
+PK: bISBN, category_id
+FK: bISBN, category_id
+bISBN -> Book(bISBN);
+category_id -> Category(category_id);
+bISBN(单值, 复合)
+category_id(多值, 复合)
+
+Book_Promotion(bISBN, promotion_id);
+PK: bISBN, promotion_id
+FK: bISBN, promotion_id
+bISBN -> Book(bISBN);
+promotion_id -> Promotion(promotion_id);
+bISBN(单值, 复合)
+promotion_id(单值, 复合)
+
+LineItem_Shipment(order_id, bISBN, tracking_num);
+PK: order_id, bISBN, tracking_num
+FK: order_id, bISBN, tracking_num
+order_id -> SingleOrder(order_id);
+bISBN -> LineItem(bISBN);
+tracking_num -> LineItem(tracking_num);
+order_id(单值, 复合)
+bISBN(单值, 复合)
+tracking_num(单值, 复合)
+
+Book_Author(bISBN, author_id);
+PK: bISBN, author_id
+FK: bISBN, author_id
+bISBN -> LineItem(bISBN);
+author_id -> Author(author_id)
+bISBN(单值, 复合)
+author_id(单值, 复合)
+
+7. 复合属性建表
+Address(address_id, address_country, address_state, address_city, address_street);
+PK: address_id
+address_id(单值, 简单)
+address_country(单值, 简单)
+address_state(单值, 简单)
+address_city(单值, 简单)
+address_street(单值, 简单)
+
+CreditCard(card_number, exp_date);
+PK: card_number
+card_number(单值, 简单)
+exp_date(单值, 简单)
+

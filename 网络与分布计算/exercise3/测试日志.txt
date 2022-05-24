@@ -1,0 +1,48 @@
+javac -d . beans/*.java -encoding utf-8
+javac -d . interfaces_/*.java -encoding utf-8
+javac -d . implements_/*.java -encoding utf-8
+javac -d . server/*.java -encoding utf-8
+javac -d . client/*.java -encoding utf-8
+
+java exercise3/server/RMIServer
+java exercise3/client/Client 127.0.0.1 1099 register qiyu 1039
+java exercise3/client/Client 127.0.0.1 1099 register zheyuan erzi
+java exercise3/client/Client 127.0.0.1 1099 register guoru erzi
+
+add待测项：
+正确输入
+add zheyuan 2021-10-16/09:00 2021-10-16/10:00 test1
+add zheyuan 2021-10-16/13:00 2021-10-16/14:00 test1
+add zheyuan 2021-10-16/15:00 2021-10-16/18:00 test2
+add guoru 2021-10-16/20:00 2021-10-16/21:00 test3
+错误输入
+add zheyuan hufhdush iasdufh test3
+add zheyuan 2021-10-16/21:00 2021-10-16/18:00 test3
+冲突时间
+add zheyuan 2021-10-16/16:00 2021-10-16/18:00 test3
+
+query待测项（根据上面三个正确输入的排序）：
+query 2021-10-16/01:00 2021-10-16/23:00 返回四个
+query 2021-10-16/01:00 2021-10-16/09:30 返回一个
+query 2021-10-16/01:00 2021-10-16/14:30 返回两个
+query 2021-10-15/01:00 2021-10-15/09:30 返回none
+（用zheyuan查询）query 2021-10-16/14:00 2021-10-16/22:00 返回一个
+错误输入：
+query hudsfha dsiauhfg
+
+delete待测项：
+delete 0 （使用第二个用户）返回删除失败
+query 2021-10-16/01:00 2021-10-16/23:00 返回三个
+delete 0 （使用第一个用户）返回删除成功
+query 2021-10-16/01:00 2021-10-16/23:00 返回两个
+错误输入：
+delete 10
+delete asdkgha adsfhoqui
+
+clear待测项：
+clear （使用第二个用户）
+query 2021-10-16/01:00 2021-10-16/23:00 返回两个
+clear （使用第一个用户）
+query 2021-10-16/01:00 2021-10-16/23:00 返回none
+错误输入：
+clear aifgdiudsfga

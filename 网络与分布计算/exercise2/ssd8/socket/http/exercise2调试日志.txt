@@ -1,0 +1,8 @@
+传文件无法打开√ BufferedInputStream 和 BufferedOutputStream 的read()函数返回的是int类型 答案代码没有转换成char
+放文件501√ （同上
+服务端没有输出header√ （同上
+传输文本文件内容错误√ Handler的processResponse加个break
+客户端断连后服务端报Exception√ （同上
+客户端输入错误的命令后关闭socket但是服务端长时间不关闭最终抛出Exception√ 不会影响服务端工作 改起来也蛮麻烦的就算了
+PUT命令没有响应√ 需要在processPutRequest()中的request后加上两个CRLF才对
+GET一个不存在的文件夹中的文件时，应当报403文件夹不存在而不是404，这里我交的时候才知道，后来就懒得写了

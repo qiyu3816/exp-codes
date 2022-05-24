@@ -1,0 +1,51 @@
+2.
+begin transaction;
+
+3.
+select balance
+from account
+where id = 2;
+
+"balance"
+"1050.59"
+
+4. 删除定期和活期两个账户
+delete from account;
+
+5.
+select * from account;
+
+"id","balance"
+
+6.
+rollback;
+
+7.
+select * from account;
+
+"id","balance"
+1,105.59
+2,1050.59
+
+8. 开始一个新事务
+begin transaction;
+
+9.
+delete from account
+where id = 1;
+
+10.
+select * from account;
+
+"id","balance"
+2,1050.59
+
+11.
+commit;
+
+12.
+rollback;
+没有可回滚的事物。
+每个commit和rollback都标志一个事务的结束，前者维持数据库变化的持久化，后者会退到事务开始前，之后由事务初始化语句开始一个新事务。
+上一个commit终止了上一个事务，这个rollback实际是对一个全新的事务进行的操作，所以现在表中只存有checking accounts。
+

@@ -1,0 +1,36 @@
+3.1题
+select *
+from Employee
+where NUmChildren >= 2 and EmpName like '%a%';
+ID | EmpName   | NumChildren
+1  | Anupam    | 3
+6  | Fernando  | 2
+7  | Gorbachev | 4
+8  | Heather   | 2
+9  | INga      | 8
+
+3.2题
+不能，这里差操作的两个表的列数量一样但相应列的数据类型不同
+
+3.3题
+不能，并操作也必须有相同的列数且各列的数据类型相同
+
+6题
+CALL 主键 FromAreaCode, FromNum， ToAreaCode, ToNum, CallStartTime;
+LOCATION 主键 AreaCode;
+
+7题
+查找10小时中每1小时始于旧金山的总呼叫数（就是地震发生前的5小时和后5小时，从1989-10-17-12:00 到 1989-10-17 22:00:00），根据总呼叫数排序。
+    select EXTRACT(HOUR from CallStartTime) as timePeriod, COUNT(CallStartTime) as totalCalls
+    from LOCATION as lo1, CALL as c1
+    where c1.CallStartTime like '1989-10-17%' and EXTRACT(HOUR from CallStartTime) <= 22 and EXTRACT(HOUR from CallStartTime) >= 12
+          and c1.FromAreaCode == lo1.AreaCode and lo1.City == 'San Francisco' 
+          and c1.Status == 'f'
+    group by timePeriod
+    order by totalCalls;
+找到当天下午6点到7点所有发生通信错误的目的地区码。
+    select ToAreaCode
+    from LOCATION as lo1, CALL as c1
+    where c1.CallStartTime like '1989-10-17%' and EXTRACT(HOUR from CallStartTime) <= 19 and EXTRACT(HOUR from CallStartTime) >= 18
+          and COUNT(Status == 'f') > COUNT(status == 's')
+    group by ToAreaCode;
