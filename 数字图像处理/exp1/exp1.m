@@ -21,17 +21,3 @@ figure(3), imshow(sunset);
 gray = rgb2gray(I);
 bino = imbinarize(gray);
 figure(4), imshow(bino);
-
-% I = imread('xun.png');
-% I = rgb2gray(I);
-% [M,N] = size(I);
-% target = zeros(size(I));
-% for i=1:M
-%     for j=1:N
-%         if I(i, j) < 40
-%             target(i, j) = 255;
-%         end
-%     end
-% end
-% imwrite(target, 'xun1.png');
-            

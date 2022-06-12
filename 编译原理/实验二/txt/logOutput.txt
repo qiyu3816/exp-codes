@@ -1,0 +1,402 @@
+Case 1: 
+struct A{
+    short num;
+    long num;
+};
+
+Case 1's ASTParseTree: specification( struct$A( member$0( signed_int$short( num )  ) member$1( signed_int$long( num )  )  )  ) 
+line 3:
+Exception: object 'num' redeclared.
+
+----------------------------------------
+Case 2: 
+module  space{
+    struct A{
+        short a;
+    };
+    struct B{
+        short a;
+    };
+};
+
+Case 2's ASTParseTree: specification( module$space( struct$A( member$0( signed_int$short( a )  )  ) struct$B( member$1( signed_int$short( a )  )  )  )  ) 
+
+----------------------------------------
+Case 3: 
+module  space{
+    struct A{
+        short a;
+    };
+    struct A{
+        short a;
+    };
+};
+
+Case 3's ASTParseTree: specification( module$space( struct$A( member$0( signed_int$short( a )  )  ) struct$A( member$1( signed_int$short( a )  )  )  )  ) 
+line 5:
+Exception: struct 'A' redefined.
+line 6:
+Exception: object 'a' redeclared.
+
+----------------------------------------
+Case 4: 
+struct a;
+struct b;
+struct b;
+
+Case 4's ASTParseTree: specification( struct$a(  ) struct$b(  ) struct$b(  )  ) 
+line 3:
+Exception: struct 'b' redefined.
+
+----------------------------------------
+Case 5: 
+module a{
+    struct b{};
+};
+module a{
+    struct b{};
+};
+
+Case 5's ASTParseTree: specification( module$a( struct$b(  )  ) module$a( struct$b(  )  )  ) 
+line 4:
+Exception: module 'a' reused.
+line 5:
+Exception: struct 'b' redefined.
+
+----------------------------------------
+Case 6: 
+module a{
+    module b{
+        struct c{};
+    };
+    module b{
+        struct d{};
+    };
+};
+
+Case 6's ASTParseTree: specification( module$a( module$b( struct$c(  )  ) module$b( struct$d(  )  )  )  ) 
+line 5:
+Exception: module 'a::b' reused.
+
+----------------------------------------
+Case 7: 
+module a{
+    struct b{
+        uint8 c, c;
+    };
+};
+
+Case 7's ASTParseTree: specification( module$a( struct$b( member$0( unsigned_int$uint8( c ) unsigned_int$uint8( c )  )  )  )  ) 
+line 3:
+Exception: object 'c' redeclared.
+
+----------------------------------------
+Case 8: 
+module a{
+    struct b{
+        uint8 e;
+        string e;
+    };
+};
+
+Case 8's ASTParseTree: specification( module$a( struct$b( member$0( unsigned_int$uint8( e )  ) member$1( base_type_spec$string( e )  )  )  )  ) 
+line 4:
+Exception: object 'e' redeclared.
+
+----------------------------------------
+Case 9: 
+module a{
+    struct A{};
+    struct b{
+        uint8 e;
+        A e;
+    };
+};
+
+Case 9's ASTParseTree: specification( module$a( struct$A(  ) struct$b( member$0( unsigned_int$uint8( e )  ) member$1( scoped_name$A( e )  )  )  )  ) 
+line 5:
+Exception: object 'e' redeclared.
+
+----------------------------------------
+Case 10: 
+struct A{
+    short a;
+    B b;
+};
+
+Case 10's ASTParseTree: specification( struct$A( member$0( signed_int$short( a )  ) member$1( scoped_name$B( b )  )  )  ) 
+line 3:
+Exception: undefined spec_type B used by object b.
+
+----------------------------------------
+Case 11: 
+module space1{
+    struct B{};
+};
+module space2{
+    struct A{
+        short a;
+        B b;
+    };
+};
+
+Case 11's ASTParseTree: specification( module$space1( struct$B(  )  ) module$space2( struct$A( member$0( signed_int$short( a )  ) member$1( scoped_name$B( b )  )  )  )  ) 
+line 7:
+Exception: undefined spec_type B used by object b.
+
+----------------------------------------
+Case 12: 
+module a{
+    struct b{
+        int d;
+    };
+};
+
+Case 12's ASTParseTree: specification( module$a( struct$b( member$0( scoped_name$int( d )  )  )  )  ) 
+line 3:
+Exception: undefined spec_type int used by object d.
+
+----------------------------------------
+Case 13: 
+module a{
+    struct B{};
+};
+module a1{
+    struct C{
+        a::B b;
+        ::a::B c;
+    };
+};
+
+Case 13's ASTParseTree: specification( module$a( struct$B(  )  ) module$a1( struct$C( member$0( scoped_name$a::B( b )  ) member$1( scoped_name$::a::B( c )  )  )  )  ) 
+
+----------------------------------------
+Case 14: 
+module A{
+    module B{
+        struct C{
+            struct D{}i1;
+        };
+    };
+};
+module a1{
+    struct C{
+        A::B::C::D b;
+        ::A::B::C::D c;
+    };
+};
+
+Case 14's ASTParseTree: specification( module$A( module$B( struct$C( member$0( struct$D(  ) ( i1 )  )  )  )  ) module$a1( struct$C( member$1( scoped_name$A::B::C::D( b )  ) member$2( scoped_name$::A::B::C::D( c )  )  )  )  ) 
+
+----------------------------------------
+Case 15: 
+struct A{
+    short a='a';
+};
+
+Case 15's ASTParseTree: specification( struct$A( member$0( signed_int$short( assign( a literal$'a'  )  )  )  )  ) 
+line 2:
+Exception: short object 'a' was assigned with invalid value char ''a''.
+
+----------------------------------------
+Case 16: 
+struct A{
+    short a=100000;
+};
+
+Case 16's ASTParseTree: specification( struct$A( member$0( signed_int$short( assign( a literal$100000  )  )  )  )  ) 
+line 2:
+Exception: short object 'a' was assigned with overflowed value '100000'.
+
+----------------------------------------
+Case 17: 
+struct A{
+    short a=15.24;
+};
+
+Case 17's ASTParseTree: specification( struct$A( member$0( signed_int$short( assign( a literal$15.24  )  )  )  )  ) 
+line 2:
+Exception: short object 'a' was assigned with invalid value floating_pt '15.24'.
+
+----------------------------------------
+Case 18: 
+struct A{
+    short a[4]=[10,12,45.34,'a'];
+};
+
+Case 18's ASTParseTree: specification( struct$A( member$0( signed_int$short( array_declarator$a( literal$4 assignArray( literal$10 literal$12 literal$45.34 literal$'a'  )  )  )  )  )  ) 
+line 2:
+Exception: array short object 'a' was assigned with invalid value floating_pt '45.34'.
+Exception: array short object 'a' was assigned with invalid value char ''a''.
+
+----------------------------------------
+Case 19: 
+struct A{};
+struct B{
+    A a = 7;
+};
+
+Case 19's ASTParseTree: specification( struct$A(  ) struct$B( member$0( scoped_name$A( assign( a literal$7  )  )  )  )  ) 
+line 3:
+Exception: spec_type 'A' object 'a' was assigned invalid value.
+
+----------------------------------------
+Case 20: 
+struct B{
+    short a[2*3.14];
+};
+
+Case 20's ASTParseTree: specification( struct$B( member$0( signed_int$short( array_declarator$a( *( literal$2  literal$3.14  )  )  )  )  )  ) 
+line 2:
+Exception: array short object 'a's index was assigned with floating_pt value '3.14'.
+
+----------------------------------------
+Case 21: 
+struct B{
+    short a[99999999];
+};
+
+Case 21's ASTParseTree: specification( struct$B( member$0( signed_int$short( array_declarator$a( literal$99999999  )  )  )  )  ) 
+line 2:
+Exception: array short object 'a's index was assigned with overflowed value '99999999'.
+
+----------------------------------------
+Case 22: 
+struct B{
+    float f = 100000000000000000000000;
+};
+
+Case 22's ASTParseTree: specification( struct$B( member$0( floating_pt_type$float( assign( f literal$100000000000000000000000  )  )  )  )  ) 
+line 2:
+Exception: float object 'f' was assigned with invalid value integer '100000000000000000000000'.
+
+----------------------------------------
+Case 23: 
+module space{
+	struct A{
+		short i1=10;
+	};
+};
+
+Case 23's ASTParseTree: specification( module$space( struct$A( member$0( signed_int$short( assign( i1 literal$10  )  )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_23.hxx
+----------------------------------------
+Case 24: 
+module space{
+	struct A{
+		short i1=10;
+	};
+	struct B{
+		long i2=100;
+		A i3;
+	};
+};
+
+Case 24's ASTParseTree: specification( module$space( struct$A( member$0( signed_int$short( assign( i1 literal$10  )  )  )  ) struct$B( member$1( signed_int$long( assign( i2 literal$100  )  )  ) member$2( scoped_name$A( i3 )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_24.hxx
+----------------------------------------
+Case 25: 
+struct A{
+	short i1=10;
+};
+
+Case 25's ASTParseTree: specification( struct$A( member$0( signed_int$short( assign( i1 literal$10  )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_25.hxx
+----------------------------------------
+Case 26: 
+module space{
+	module inner{
+		struct A{
+			short i1=10;
+		};
+	};
+};
+
+Case 26's ASTParseTree: specification( module$space( module$inner( struct$A( member$0( signed_int$short( assign( i1 literal$10  )  )  )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_26.hxx
+----------------------------------------
+Case 27: 
+module space{
+	struct A{
+		short i1=10;
+		int16 i2=10;
+		long i3=100;
+		int32 i4=100;
+		long long i5=1000;
+		int64 i6=1000;
+		unsigned short i7=10;
+		uint16 i8=10;
+		unsigned long i9=100;
+		uint32 i10=100;
+		unsigned long long i11=1000;
+		uint64 i12=1000;
+		char c0='a';
+		string c1="abc";
+		boolean c2=true;
+		float c3=10.901f;
+		double c4=23.234d;
+		long double c5=12.23456432235d;
+		short arr[10]=[0,1,2,3,4,5,6,7,8,9];
+	};
+};
+
+Case 27's ASTParseTree: specification( module$space( struct$A( member$0( signed_int$short( assign( i1 literal$10  )  )  ) member$1( signed_int$int16( assign( i2 literal$10  )  )  ) member$2( signed_int$long( assign( i3 literal$100  )  )  ) member$3( signed_int$int32( assign( i4 literal$100  )  )  ) member$4( signed_int$longlong( assign( i5 literal$1000  )  )  ) member$5( signed_int$int64( assign( i6 literal$1000  )  )  ) member$6( unsigned_int$unsignedshort( assign( i7 literal$10  )  )  ) member$7( unsigned_int$uint16( assign( i8 literal$10  )  )  ) member$8( unsigned_int$unsignedlong( assign( i9 literal$100  )  )  ) member$9( unsigned_int$uint32( assign( i10 literal$100  )  )  ) member$10( unsigned_int$unsignedlonglong( assign( i11 literal$1000  )  )  ) member$11( unsigned_int$uint64( assign( i12 literal$1000  )  )  ) member$12( base_type_spec$char( assign( c0 literal$'a'  )  )  ) member$13( base_type_spec$string( assign( c1 literal$"abc"  )  )  ) member$14( base_type_spec$boolean( assign( c2 literal$true  )  )  ) member$15( floating_pt_type$float( assign( c3 literal$10.901f  )  )  ) member$16( floating_pt_type$double( assign( c4 literal$23.234d  )  )  ) member$17( floating_pt_type$longdouble( assign( c5 literal$12.23456432235d  )  )  ) member$18( signed_int$short( array_declarator$arr( literal$10 assignArray( literal$0 literal$1 literal$2 literal$3 literal$4 literal$5 literal$6 literal$7 literal$8 literal$9  )  )  )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_27.hxx
+----------------------------------------
+Case 28: 
+module a{
+    struct b{
+        uint16 c = 17;
+        uint32 d = 18;
+    };
+};
+
+Case 28's ASTParseTree: specification( module$a( struct$b( member$0( unsigned_int$uint16( assign( c literal$17  )  )  ) member$1( unsigned_int$uint32( assign( d literal$18  )  )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_28.hxx
+----------------------------------------
+Case 29: 
+module space{
+	struct A{
+		short i1=10;
+		float f1=12.5;
+	};
+	struct B{
+		long i2=100;
+		A i3;
+	};
+};
+
+Case 29's ASTParseTree: specification( module$space( struct$A( member$0( signed_int$short( assign( i1 literal$10  )  )  ) member$1( floating_pt_type$float( assign( f1 literal$12.5  )  )  )  ) struct$B( member$2( signed_int$long( assign( i2 literal$100  )  )  ) member$3( scoped_name$A( i3 )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_29.hxx
+----------------------------------------
+Case 30: 
+struct A{
+    uint32 i1=1;
+};
+struct B{
+    float i1=3.14;
+};
+struct C{
+    string i1="hello";
+};
+
+Case 30's ASTParseTree: specification( struct$A( member$0( unsigned_int$uint32( assign( i1 literal$1  )  )  )  ) struct$B( member$1( floating_pt_type$float( assign( i1 literal$3.14  )  )  )  ) struct$C( member$2( base_type_spec$string( assign( i1 literal$"hello"  )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_30.hxx
+----------------------------------------
+Case 31: 
+struct A{
+    string s[9]=["hello"];
+};
+
+Case 31's ASTParseTree: specification( struct$A( member$0( base_type_spec$string( array_declarator$s( literal$9 assignArray( literal$"hello"  )  )  )  )  )  ) 
+
+The .hxx file has been written to ./src/main/txt/HXX_31.hxx
+----------------------------------------

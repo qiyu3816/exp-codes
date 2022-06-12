@@ -1,0 +1,189 @@
+group HXX;
+
+headerTemplate(src_file_name) ::= <<
+/*
+WARNING: THIS FILE IS AUTO-GENERATED. DO NOT MODIFY.
+
+This file was generated from <src_file_name>.idl using "idltoc".
+The idltoc tool is part of the RTI Data Distribution Service distribution.
+For more information, type 'idltoc -help' at a command shell
+or consult the RTI Data Distribution Service manual.
+*/
+
+#ifndef <src_file_name>_h
+#define <src_file_name>_h
+
+#ifndef rti_me_cpp_hxx
+#include "rti_me_cpp.hxx"
+#endif
+
+#ifdef NDDS_USER_DLL_EXPORT
+#if (defined(RTI_WIN32) || defined(RTI_WINCE))
+/* If the code is building on Windows, start exporting symbols. */
+#undef NDDSUSERDllExport
+#define NDDSUSERDllExport __declspec(dllexport)
+#endif
+#else
+#undef NDDSUSERDllExport
+#define NDDSUSERDllExport
+#endif
+
+>>
+
+structTemplate(moduleSpace, structID, tokenItemArray, nestStruct) ::= <<
+
+struct <moduleSpace><structID>Seq;
+class <moduleSpace><structID>TypeSupport;
+class <moduleSpace><structID>DataWriter;
+class <moduleSpace><structID>DataReader;
+
+class <moduleSpace><structID>
+{
+  public: 
+    typedef struct <moduleSpace><structID>Seq Seq;
+    typedef <moduleSpace><structID>TypeSupport TypeSupport;
+    typedef <moduleSpace><structID>DataWriter DataWriter;
+    typedef <moduleSpace><structID>DataReader DataReader;
+
+    <declareTemplate(tokenItemArray, nestStruct)>
+}
+
+extern const char *<moduleSpace><structID>TYPENAME;
+
+REDA_DEFINE_SEQUENCE_STRUCT(<moduleSpace><structID>Seq, <moduleSpace><structID>);
+
+REDA_DEFINE_SEQUENCE_IN_C(<moduleSpace><structID>Seq, <moduleSpace><structID>);
+
+<if(nestStruct)><structNestInitializeTemplate(moduleSpace, structID, tokenItemArray)><endif>
+
+NDDSUSERDllExport extern RTI_BOOL
+<moduleSpace><structID>_initialize(<moduleSpace><structID>* sample)
+{
+    <initializeTemplate(tokenItemArray)>
+       
+    return RTI_TRUE;
+}
+
+NDDSUSERDllExport extern RTI_BOOL
+<moduleSpace><structID>_finalize(<moduleSpace><structID>* sample)
+{
+    <finalizeTemplate(tokenItemArray)>
+      
+    return RTI_TRUE;
+}
+
+>>
+
+declareTemplate(tokenItemArray, nestStruct) ::= <<
+<tokenItemArray:{item|<if(!item.isStruct)>CDR_<endif><item.type> <item.id><if(item.isArray)>[<item.indexVal>]<endif><if(!nestStruct)>=<item.val><endif>;};separator="\n">
+
+>>
+
+initializeTemplate(tokenItemArray) ::= <<
+<tokenItemArray:{item|<if(item.isArray)><if(item.isString)><stringArrayInitializeTemplate(item)><else><commonArrayInitializeTemplate(item)><endif><elseif(item.isString)><stringInitializeTemplate(item)><elseif(item.isStruct)><structInitializeTemplate(item)><else><commonInitializeTemplate(item)><endif>};separator="\n">
+
+>>
+
+commonInitializeTemplate(inputItem) ::= <<
+CDR_Primitive_init_<inputItem.type>(&sample-><inputItem.id>);
+>>
+
+stringInitializeTemplate(inputItem) ::= <<
+if (!CDR_String_initialize(&sample-><inputItem.id>, (255)))
+{
+    return RTI_FALSE;
+}
+>>
+
+structInitializeTemplate(inputItem) ::= <<
+if (!<inputItem.type>_initialize(&sample-><inputItem.id>))
+{
+    return RTI_FALSE;
+}
+>>
+
+stringArrayInitializeTemplate(inputItem) ::= <<
+CDR_Primitive_init_Array(
+    sample-><inputItem.id>, ((<inputItem.indexVal>)*CDR_<inputItem.capitalType>_SIZE));
+{
+    for(RTI_UINT32 i = 0; i \< <inputItem.indexVal>; i++)
+    {
+        if (!CDR_String_initialize(&sample-><inputItem.id>[i], (255)))
+        {
+            return RTI_FALSE;
+        }
+    }
+}
+>>
+
+commonArrayInitializeTemplate(inputItem) ::= <<
+CDR_Primitive_init_Array(
+    sample-><inputItem.id>, ((<inputItem.indexVal>)*CDR_<inputItem.capitalType>_SIZE));
+>>
+
+structNestInitializeTemplate(moduleSpace, structID, tokenItemArray) ::= <<
+NDDSUSERDllExport extern
+<moduleSpace><structID>(){
+	<tokenItemArray:{item|<if(item.isStruct)><item.structItems:{item1|this-><item.id>.<item1.id>=<item1.attribute>;};separator="\n"><else>this-><item.id>=<item.val>;<endif>};separator="\n">
+}
+>>
+
+finalizeTemplate(tokenItemArray) ::= <<
+UNUSED_ARG(sample);
+<tokenItemArray:{item|<if(item.isString)><if(item.isArray)><stringArrayFinalizeTemplate(item)><else><stringFinalizeTemplate(item)><endif><elseif(item.isStruct)><structFinalizeTemplate(item)><else><if(item.isArray)><arrayFinalizeTemplate(item)><endif><endif>}>
+
+>>
+
+stringFinalizeTemplate(inputItem) ::= <<
+CDR_String_finalize(&sample-><inputItem.id>);
+
+>>
+
+structFinalizeTemplate(inputItem) ::= <<
+<inputItem.type>_finalize(&sample-><inputItem.id>);
+
+>>
+
+arrayFinalizeTemplate(inputItem) ::= <<
+{
+    RTI_UINT32 i;
+
+    for (i = 0; i \< (<inputItem.indexVal>); i++)
+    {
+        if (!CDR_<inputItem.type>_copy(&dst-><inputItem.id>[i], &src-><inputItem.id>[i]))
+        {
+            return RTI_FALSE;
+        }
+    }
+}
+
+>>
+
+stringArrayFinalizeTemplate(inputItem) ::= <<
+{
+    RTI_UINT32 i;
+
+    for (i = 0; i \< (<inputItem.indexVal>); i++)
+    {
+        CDR_String_finalize(&sample-><inputItem.id>[i]);
+        if (!CDR_<inputItem.type>_copy(&dst-><inputItem.id>[i], &src-><inputItem.id>[i]))
+        {
+            return RTI_FALSE;
+        }
+    }
+}
+
+>>
+
+footerTemplate(src_file_name) ::= <<
+#ifdef NDDS_USER_DLL_EXPORT
+#if (defined(RTI_WIN32) || defined(RTI_WINCE))
+/* If the code is building on Windows, stop exporting symbols. */
+#undef NDDSUSERDllExport
+#define NDDSUSERDllExport
+#endif
+#endif
+
+#endif /* <src_file_name> */
+
+>>
